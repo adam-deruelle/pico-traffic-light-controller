@@ -1,89 +1,130 @@
-# 🚦 SAÉ 4 – Contrôleur de feux de circulation intelligent
+<a id="top"></a>
+# Smart Traffic Light Controller — Raspberry Pi Pico
 
-## 🎯 Objectif du projet
+**[🇬🇧 English](#english) · [🇫🇷 Français](#francais)**
 
-Créer un système automatisé de gestion de feux de circulation, capable de :
-- Gérer deux feux de circulation (Voie 1 et Voie 2)
-- Intégrer une **priorité piéton** via des boutons
-- Basculer entre **mode jour/nuit**
-- Détecter une **panne** et afficher l'état du système
-
-Le système est embarqué sur une carte **Raspberry Pi Pico**, programmé en **CircuitPython**.
-
-## ⚙️ Architecture générale
-
-Le contrôleur gère :
-
-- **6 LED pour les feux** (Vert, Orange, Rouge x2)
-- **2 boutons piétons**
-- **1 boucle magnétique** (détection véhicule)
-- **1 écran OLED SPI** (interface utilisateur)
-- **1 LED intégrée** (indication mode)
-- **3 boutons Menu/Plus/Moins** pour modifier les durées
-
-Le programme utilise :
-- Des **temporisations** configurables via `TON` (Timer ON)
-- Une interface **affichée en temps réel** sur l’écran OLED
-- Une **détection analogique de panne** (seuil > 3V)
-
-## 🛠️ Fonctionnalités implémentées
-
-### 🔁 Cycle des feux
-
-| Étapes       | Description                          |
-|--------------|--------------------------------------|
-| X0           | Feu 1 : Vert                         |
-| X10 → X20    | Feu 1 : Orange puis Rouge            |
-| X30 → X50    | Feu 2 : Vert → Orange                |
-| X60          | Feu 2 : Rouge → retour à X0          |
-
-Les transitions sont déclenchées par des temporisations et/ou événements : bouton piéton, boucle magnétique.
-
-### 🧭 Modes de fonctionnement
-
-- `jour/nuit` : alternance automatique via minuteurs
-- `jour` : mode fixe en journée
-- `nuit` : mode fixe en nocturne
-- Le mode est configurable via l’écran OLED et les boutons
-
-### 🧱 Affichage OLED (menu interactif)
-
-L'écran affiche :
-- Durée de chaque feu (modifiable)
-- Mode de fonctionnement
-- Possibilité de redémarrer ou sortir du menu
-
-### ⚠️ Gestion de panne
-
-Un capteur analogique vérifie une tension > 3V.  
-En cas de panne :
-- Le programme affiche l’erreur
-- Les feux sont désactivés ou figés selon le mode
-
-## 💡 Logique de programmation
-
-La logique principale repose sur :
-- Des variables d’étapes (`X0`, `X10`, …)
-- Des conditions d’évolution (CE) basées sur `Timer.Q` et entrées
-- La mise à jour permanente des sorties en fonction de l'état
-
-## ✅ Résultats obtenus
-
-- Système 100% fonctionnel en conditions simulées
-- Interface intuitive pour modifier les durées
-- Détail complet de l'automatisme dans le code Python
-- Affichage clair de l'état et détection de panne efficace
+![Controller board running in day/night mode](IMG_20250610_104813.jpg)
 
 ---
 
-## 📝 Compétences mobilisées
+<a id="english"></a>
+## 🇬🇧 English
 
-- Programmation microcontrôleur (CircuitPython)
-- Utilisation de GPIO (entrées/sorties digitales et analogiques)
-- Interface utilisateur embarquée (écran SPI)
-- Logique séquentielle et états
-- Maintenance logicielle et affichage dynamique
+> Two-lane traffic light controller with pedestrian priority, day/night modes, on-board settings menu and fault detection. Sequential logic designed as a GRAFCET, implemented in CircuitPython and in IEC 61131-3 languages on CODESYS.
+
+**Context:** University project (SAÉ 4), BUT GEII — IUT de Rennes, 2025
+**Team:** Adam Deruelle, Melvin Allard
+**Stack:** Raspberry Pi Pico · CircuitPython · SPI OLED display · CODESYS (LD / ST / SFC)
+
+### Features
+
+- **Two traffic lights** (green / amber / red per lane) with a full alternating cycle
+- **Pedestrian priority** via two push buttons
+- **Vehicle detection** input (magnetic loop)
+- **Day / night / automatic** operating modes
+- **Settings menu** on an SPI OLED screen with three buttons (Menu / + / −) to tune each light duration live
+- **Fault detection** on an analog input (threshold > 3 V): error displayed and lights frozen or switched off depending on the mode
+
+### How it works
+
+The behaviour was first modelled as a **GRAFCET** (sequential function chart), then translated step by step into code: each step is a variable (`X0`, `X10`, …), each transition is a boolean condition on timers and inputs, and outputs are recomputed every cycle — the same structure as a PLC program.
+
+| Step | Lane 1 | Lane 2 |
+|---|---|---|
+| X0 | Green | Red |
+| X10 → X20 | Amber → Red | Red |
+| X30 → X50 | Red | Green → Amber |
+| X60 | Red | Red → back to X0 |
+
+Timings use a **`TON` class** (`Codes/timer.py`) that reproduces the IEC 61131-3 on-delay timer of industrial PLCs on a microcontroller.
+
+### Repository layout
+
+```
+├── Codes/
+│   ├── code1.py … code6.py   Incremental versions, from basic I/O to the complete program
+│   ├── timer.py              TON on-delay timer class (PLC-style)
+│   └── maintenance.py        OLED display & settings menu
+├── InitiationCodesys/        Same logic in Ladder (LD), Structured Text (ST) and SFC on CODESYS
+├── Contrôleur de feux de circulation.pdf   Project report (FR)
+└── Feux de circulation - Codesys.pdf       CODESYS report (FR)
+```
+
+`code6.py` is the final, complete program.
+
+### Run it
+
+1. Flash CircuitPython on a Raspberry Pi Pico.
+2. Copy `Codes/timer.py`, `Codes/maintenance.py` and `Codes/code6.py` (renamed `code.py`) to the `CIRCUITPY` drive.
+3. The program starts automatically on boot.
+
+### What I learned
+
+- Designing sequential logic with GRAFCET and porting it to both a microcontroller and a PLC environment
+- Embedded I/O: digital inputs/outputs, analog reading, SPI display
+- Building a usable embedded user interface
+- Incremental development: each version adds one feature and is tested before the next
+
+[⬆ Back to top](#top)
 
 ---
 
-> 👨‍💻 Projet réalisé par Adam DERUELLE - Melvin ALLARD – GEII – IUT de Rennes
+<a id="francais"></a>
+## 🇫🇷 Français
+
+> Contrôleur de feux de circulation à deux voies avec priorité piéton, modes jour/nuit, menu de réglage embarqué et détection de panne. Logique séquentielle conçue en GRAFCET, implémentée en CircuitPython et dans les langages IEC 61131-3 sous CODESYS.
+
+**Contexte :** Projet universitaire (SAÉ 4), BUT GEII — IUT de Rennes, 2025
+**Équipe :** Adam Deruelle, Melvin Allard
+**Stack :** Raspberry Pi Pico · CircuitPython · écran OLED SPI · CODESYS (LD / ST / SFC)
+
+### Fonctionnalités
+
+- **Deux feux de circulation** (vert / orange / rouge par voie) avec un cycle alterné complet
+- **Priorité piéton** via deux boutons poussoirs
+- Entrée de **détection de véhicule** (boucle magnétique)
+- Modes de fonctionnement **jour / nuit / automatique**
+- **Menu de réglage** sur écran OLED SPI avec trois boutons (Menu / + / −) pour modifier en direct la durée de chaque feu
+- **Détection de panne** sur une entrée analogique (seuil > 3 V) : erreur affichée et feux figés ou éteints selon le mode
+
+### Fonctionnement
+
+Le comportement a d'abord été modélisé en **GRAFCET**, puis traduit étape par étape en code : chaque étape est une variable (`X0`, `X10`, …), chaque transition est une condition booléenne sur les temporisations et les entrées, et les sorties sont recalculées à chaque cycle — la même structure qu'un programme d'automate.
+
+| Étape | Voie 1 | Voie 2 |
+|---|---|---|
+| X0 | Vert | Rouge |
+| X10 → X20 | Orange → Rouge | Rouge |
+| X30 → X50 | Rouge | Vert → Orange |
+| X60 | Rouge | Rouge → retour à X0 |
+
+Les temporisations utilisent une **classe `TON`** (`Codes/timer.py`) qui reproduit sur microcontrôleur la temporisation au travail IEC 61131-3 des automates industriels.
+
+### Organisation du dépôt
+
+```
+├── Codes/
+│   ├── code1.py … code6.py   Versions successives, des E/S de base au programme complet
+│   ├── timer.py              Classe de temporisation TON (façon automate)
+│   └── maintenance.py        Afficheur OLED et menu de réglage
+├── InitiationCodesys/        Même logique en Ladder (LD), Structured Text (ST) et SFC sous CODESYS
+├── Contrôleur de feux de circulation.pdf   Compte rendu du projet
+└── Feux de circulation - Codesys.pdf       Compte rendu CODESYS
+```
+
+`code6.py` est le programme final complet.
+
+### Lancer le projet
+
+1. Installer CircuitPython sur une Raspberry Pi Pico.
+2. Copier `Codes/timer.py`, `Codes/maintenance.py` et `Codes/code6.py` (renommé `code.py`) sur le lecteur `CIRCUITPY`.
+3. Le programme démarre automatiquement à la mise sous tension.
+
+### Ce que j'ai appris
+
+- Concevoir une logique séquentielle en GRAFCET et la porter à la fois sur microcontrôleur et en environnement automate
+- E/S embarquées : entrées/sorties numériques, lecture analogique, écran SPI
+- Concevoir une interface utilisateur embarquée utilisable
+- Développement incrémental : chaque version ajoute une fonctionnalité, testée avant de passer à la suivante
+
+[⬆ Retour en haut](#top)
