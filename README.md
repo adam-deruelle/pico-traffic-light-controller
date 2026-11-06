@@ -45,9 +45,7 @@ Timings use a **`TON` class** (`Codes/timer.py`) that reproduces the IEC 61131-3
 │   ├── code1.py … code6.py   Incremental versions, from basic I/O to the complete program
 │   ├── timer.py              TON on-delay timer class (PLC-style)
 │   └── maintenance.py        OLED display & settings menu
-├── InitiationCodesys/        Same logic in Ladder (LD), Structured Text (ST) and SFC on CODESYS
-├── Contrôleur de feux de circulation.pdf   Project report (FR)
-└── Feux de circulation - Codesys.pdf       CODESYS report (FR)
+└── InitiationCodesys/        Same logic in Ladder (LD), Structured Text (ST) and SFC on CODESYS
 ```
 
 `code6.py` is the final, complete program.
@@ -107,9 +105,7 @@ Les temporisations utilisent une **classe `TON`** (`Codes/timer.py`) qui reprodu
 │   ├── code1.py … code6.py   Versions successives, des E/S de base au programme complet
 │   ├── timer.py              Classe de temporisation TON (façon automate)
 │   └── maintenance.py        Afficheur OLED et menu de réglage
-├── InitiationCodesys/        Même logique en Ladder (LD), Structured Text (ST) et SFC sous CODESYS
-├── Contrôleur de feux de circulation.pdf   Compte rendu du projet
-└── Feux de circulation - Codesys.pdf       Compte rendu CODESYS
+└── InitiationCodesys/        Même logique en Ladder (LD), Structured Text (ST) et SFC sous CODESYS
 ```
 
 `code6.py` est le programme final complet.
